@@ -35,33 +35,30 @@ interface BoardProps {
 
 class Board extends React.Component<BoardProps> {
     renderSquare(i: number) {
-        return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)} />;
+        return <Square key={i} value={this.props.squares[i]} onClick={() => this.props.onClick(i)} />;
     }
 
     render() {
-        return (
-            <div>
-                <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
-                </div>
-            </div>
-        );
+        let rows: JSX.Element[] = [];
+        for (let i = 0; i < 3; i++) {
+            const squares: JSX.Element[] = [];
+            for (let j = 0; j < 3; j++) {
+                squares.push(this.renderSquare(i * 3 + j));
+            }
+            rows.push(<div key={i} className="board-row">{squares}</div>);
+        }
+        return (<div>{rows}</div>);
     }
 }
 
-type GameHistory = { squares: AllSquaresValues }[];
+interface GameHistoryStep {
+    squares: AllSquaresValues,
+    col: number | undefined;
+    row: number | undefined;
+    xIsCurrent: boolean;
+}
+
+type GameHistory = GameHistoryStep[];
 
 interface GameState {
     history: GameHistory;
@@ -77,6 +74,9 @@ class Game extends React.Component<{}, GameState> {
             history: [
                 {
                     squares: Array(9).fill(undefined) as AllSquaresValues,
+                    col: undefined,
+                    row: undefined,
+                    xIsCurrent: true,
                 },
             ],
             xIsNext: true,
@@ -91,9 +91,14 @@ class Game extends React.Component<{}, GameState> {
 
         const moves = history.map((step, move) => {
             const desc = move ? `Go to move #${move}` : "Go to game start";
+            const span = move ? `${step.xIsCurrent ? "X : " : "0 : " }[${step.col}, ${step.row}]` : "";
             return (
                 <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                    <button onClick={() => this.jumpTo(move)}
+                        style={move === this.state.stepNumber ? { fontWeight: "bold" } : { fontWeight: "normal" }}>
+                        {desc}
+                    </button>
+                    <span style={{ marginLeft: "10px" }}>{span}</span>
                 </li>
             );
         });
@@ -139,6 +144,9 @@ class Game extends React.Component<{}, GameState> {
             history: history.concat([
                 {
                     squares,
+                    col: i % 3 + 1,
+                    row: Math.floor(i / 3 + 1),
+                    xIsCurrent: this.state.xIsNext,
                 },
             ]),
             stepNumber: history.length,
