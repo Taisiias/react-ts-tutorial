@@ -91,11 +91,13 @@ class Game extends React.Component<{}, GameState> {
 
         const moves = history.map((step, move) => {
             const desc = move ? `Go to move #${move}` : "Go to game start";
-            const span = move ? `${step.xIsCurrent ? "X : " : "0 : " }[${step.col}, ${step.row}]` : "";
+            const span = move ? `${step.xIsCurrent ?
+                "X : " : "0 : " }[${step.col}, ${step.row}]` : "";
             return (
                 <li key={move}>
                     <button onClick={() => this.jumpTo(move)}
-                        style={move === this.state.stepNumber ? { fontWeight: "bold" } : { fontWeight: "normal" }}>
+                        style={move === this.state.stepNumber ?
+                            { fontWeight: "bold" } : { fontWeight: "normal" }}>
                         {desc}
                     </button>
                     <span style={{ marginLeft: "10px" }}>{span}</span>
@@ -104,7 +106,16 @@ class Game extends React.Component<{}, GameState> {
         });
 
         let status;
-        if (winner) {
+        let isDraw = true;
+        for (let i = 0; i<current.squares.length; i++) {
+            if(!current.squares[i]) {
+                isDraw = false;
+                break;
+            }
+        }
+        if(isDraw) {
+            status = "It's a draw!"
+        } else if (winner) {
             status = "Winner: " + winner;
         } else {
             status = "Next player: " + (this.state.xIsNext ? "X" : "O");
