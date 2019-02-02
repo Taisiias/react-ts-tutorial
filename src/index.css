@@ -33,7 +33,14 @@ ul {
     width: 34px;
 }
 
+.square.highlighted {
+    color: red;
+}
+
 .square:focus {
+    outline: none;
+}
+.winner-square:focus {
     outline: none;
 }
 
